@@ -1,0 +1,17 @@
+{
+  "name": "那須ハイランドパークガイド",
+  "short_name": "那須ハイランドパーク",
+  "description": "那須ハイランドパーク 非公式ガイド。マップ・のりもの・身長判定・レストラン・おすすめルート。",
+  "lang": "ja",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef4fb",
+  "theme_color": "#0c4a8e",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

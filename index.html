@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>那須ハイランドパークガイド</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="那須ハイランドパーク">
+<meta name="theme-color" content="#0c4a8e">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#eef4fb; --card:#ffffff; --ink:#16273b; --sub:#5d7189; --line:#e2eaf3;
+  --sky1:#3ea3f2; --sky2:#0c4a8e; --accent:#ff6a3d;
+  --go:#22b06b; --warn:#f5a623; --no:#e8503a;
+  --tabh:62px; --safeb:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  background:var(--bg); color:var(--ink);
+  overscroll-behavior:none; -webkit-text-size-adjust:100%;
+}
+.app{max-width:520px;margin:0 auto;min-height:100%;position:relative;}
+
+/* Header */
+.hdr{
+  position:sticky;top:0;z-index:40;
+  background:linear-gradient(135deg,var(--sky1),var(--sky2));
+  color:#fff;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 12px;
+  box-shadow:0 2px 12px rgba(11,74,142,.25);
+}
+.hdr-row{display:flex;align-items:center;gap:10px;}
+.hdr h1{font-size:16.5px;margin:0;font-weight:800;letter-spacing:0;flex:1;line-height:1.2;}
+.hdr h1 small{display:block;font-size:11px;font-weight:500;opacity:.85;letter-spacing:1px;margin-top:1px;}
+.hpill{
+  background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.5);
+  color:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;
+  display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;
+}
+.hpill b{font-size:15px;}
+
+/* Views */
+.view{display:none;padding:12px 12px calc(var(--tabh) + var(--safeb) + 20px);}
+.view.on{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* Chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{
+  flex:0 0 auto;background:var(--card);border:1.5px solid var(--line);color:var(--sub);
+  border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;
+}
+.chip.on{background:var(--sky2);border-color:var(--sky2);color:#fff;}
+
+/* Cards */
+.card{
+  background:var(--card);border-radius:16px;padding:13px 14px;margin-bottom:11px;
+  box-shadow:0 1px 3px rgba(22,39,59,.06),0 6px 18px rgba(22,39,59,.05);
+}
+.imgwrap{position:relative;width:calc(100% + 28px);margin:-13px -14px 11px;}
+.imgwrap .cardimg{width:100%;margin:0;}
+.cardimg{width:calc(100% + 28px);margin:-13px -14px 11px;height:auto;aspect-ratio:3/2;object-fit:cover;display:block;border-radius:16px 16px 0 0;background:#dde6ef;}
+.card.ridden .cardimg{filter:saturate(.6);}
+.statusdot{position:absolute;right:10px;bottom:10px;display:inline-flex;align-items:center;gap:5px;
+  padding:5px 11px 5px 9px;border-radius:999px;font-size:12.5px;font-weight:800;color:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.28);backdrop-filter:blur(2px);}
+.statusdot i{width:11px;height:11px;border-radius:50%;background:#fff;display:inline-block;}
+.sd-go{background:rgba(24,150,80,.92);} .sd-warn{background:rgba(200,130,10,.94);} .sd-no{background:rgba(200,50,35,.94);}
+.sheetimg{width:calc(100% + 32px);margin:0 -16px 12px;height:auto;aspect-ratio:3/2;object-fit:cover;display:block;border-radius:14px;background:#dde6ef;}
+.dishcap{font-size:12px;font-weight:800;color:var(--sub);margin:2px 0 6px;}
+.dishrow{display:flex;gap:6px;margin-bottom:10px;}
+.dishrow img{flex:1;width:0;aspect-ratio:3/2;object-fit:cover;border-radius:9px;background:#dde6ef;display:block;}
+.arow{display:flex;align-items:flex-start;gap:10px;}
+.anum{
+  flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:var(--sky2);color:#fff;
+  font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:1px;
+}
+.aname{font-size:16px;font-weight:800;line-height:1.3;flex:1;}
+.aarea{font-size:11.5px;color:var(--sub);font-weight:700;margin-top:2px;}
+.aprice{font-size:14px;font-weight:800;color:var(--accent);white-space:nowrap;}
+.badge{
+  display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 10px;
+  font-size:12.5px;font-weight:800;margin-top:8px;
+}
+.b-go{background:#e2f7ec;color:#12894e;}
+.b-warn{background:#fef1da;color:#b9770a;}
+.b-no{background:#fde6e2;color:#c9341f;}
+.b-closed{background:#3a4653;color:#fff;}
+.card.closed .cardimg{filter:grayscale(.72) brightness(.86);}
+.closeribbon{position:absolute;left:0;top:14px;background:#c9341f;color:#fff;font-size:12.5px;font-weight:800;
+  padding:5px 12px 5px 10px;border-radius:0 8px 8px 0;box-shadow:0 2px 8px rgba(0,0,0,.32);z-index:2;letter-spacing:.5px;}
+.sd-closed{background:rgba(58,70,83,.95);}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.tag{font-size:11px;font-weight:700;color:var(--sub);background:#f1f5fa;border-radius:6px;padding:3px 7px;}
+.tag.rain{background:#e8f1fd;color:#2f6fc4;}
+.tag.baby{background:#fdeef4;color:#c05a86;}
+.tag.dog{background:#f0efe0;color:#8a7b1e;}
+.stars{color:var(--warn);font-size:13px;letter-spacing:1px;font-weight:800;}
+.mapbtn{
+  display:inline-flex;align-items:center;gap:6px;background:var(--sky2);color:#fff;
+  border:none;border-radius:10px;padding:8px 13px;font-size:13px;font-weight:800;cursor:pointer;
+}
+.btnrow{display:flex;gap:8px;margin-top:10px;align-items:stretch;}
+.ridebtn{
+  flex:0 0 auto;background:#fff;border:1.5px solid var(--go);color:var(--go);
+  border-radius:10px;padding:8px 13px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;
+}
+.ridebtn.on{background:var(--go);color:#fff;border-color:var(--go);}
+.ridtag{font-size:11px;font-weight:800;color:#fff;background:var(--go);border-radius:6px;padding:2px 7px;vertical-align:2px;}
+.card.ridden{background:#f2fbf6;}
+.card.ridden .anum{background:var(--go);}
+.note{font-size:12px;color:var(--sub);margin-top:7px;line-height:1.5;}
+.datebar{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ff7b45,#e8503a);color:#fff;border-radius:12px;padding:9px 13px;font-size:13.5px;font-weight:800;margin-bottom:10px;box-shadow:0 3px 10px rgba(232,80,58,.25);}
+.datebar b{font-size:15px;}
+.prog{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#eef7f1;border:1.5px solid #cdebd9;border-radius:12px;padding:8px 12px;margin-bottom:10px;}
+.prog .prog-txt{font-size:13.5px;font-weight:800;color:#12894e;}
+.prog .rst{font-size:12px;font-weight:800;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;}
+
+/* Map */
+#mapwrap{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#cbe6ff,#eaf6ff);box-shadow:0 4px 20px rgba(22,39,59,.1);touch-action:none;}
+#mapsvg{display:block;width:100%;height:auto;}
+.zbtns{position:absolute;right:10px;bottom:12px;display:flex;flex-direction:column;gap:7px;z-index:5;}
+.zbtn{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.95);border:1px solid var(--line);
+  font-size:22px;font-weight:800;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);cursor:pointer;}
+.legend{position:absolute;left:10px;top:10px;background:rgba(255,255,255,.94);border-radius:12px;padding:8px 10px;font-size:11px;font-weight:700;z-index:5;box-shadow:0 2px 8px rgba(0,0,0,.1);line-height:1.7;}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px;}
+.pin{cursor:pointer;}
+.pin .pdot{transition:.15s;}
+.pin.dim{opacity:.22;}
+.pin.hl .pring{opacity:1;}
+
+/* Bottom sheet */
+.sheet-bg{position:fixed;inset:0;background:rgba(15,30,50,.45);z-index:60;opacity:0;pointer-events:none;transition:.25s;}
+.sheet-bg.on{opacity:1;pointer-events:auto;}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:61;max-width:520px;margin:0 auto;
+  background:#fff;border-radius:22px 22px 0 0;padding:8px 16px calc(20px + var(--safeb));
+  transform:translateY(102%);transition:transform .3s cubic-bezier(.3,.9,.3,1);max-height:82vh;overflow-y:auto;
+}
+.sheet.on{transform:none;}
+.grab{width:42px;height:5px;border-radius:3px;background:#d7e0ea;margin:6px auto 12px;}
+.sheet h2{font-size:20px;margin:0 0 3px;font-weight:800;}
+
+/* Tabs */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:520px;margin:0 auto;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);display:flex;height:calc(var(--tabh) + var(--safeb));padding-bottom:var(--safeb);
+}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--sub);font-size:10.5px;font-weight:700;}
+.tab .ic{font-size:21px;line-height:1;}
+.tab.on{color:var(--sky2);}
+
+/* Info */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px;}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:9px 6px;text-align:center;}
+.tbl th{color:var(--sub);font-size:12px;font-weight:800;}
+.tbl td:first-child{text-align:left;font-weight:700;}
+.tbl .p{color:var(--accent);font-weight:800;}
+.sec-t{font-size:16px;font-weight:800;margin:20px 2px 8px;display:flex;align-items:center;gap:7px;}
+.sec-t:first-child{margin-top:4px;}
+.info-p{font-size:13.5px;line-height:1.7;color:var(--ink);margin:0 2px;}
+.info-p b{color:var(--sky2);}
+.step{display:flex;gap:11px;margin-bottom:2px;}
+.step-n{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;}
+.step-dot{width:26px;height:26px;border-radius:50%;background:var(--sky2);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.step-line{width:2px;flex:1;background:var(--line);margin:2px 0;}
+.step-b{padding-bottom:15px;flex:1;}
+.step-b .t{font-size:15px;font-weight:800;}
+.step-b .d{font-size:12.5px;color:var(--sub);margin-top:2px;line-height:1.5;}
+.hero{border-radius:16px;padding:14px 15px;color:#fff;margin-bottom:12px;}
+.hero h3{margin:0 0 4px;font-size:18px;font-weight:800;}
+.hero p{margin:0;font-size:12.5px;opacity:.95;line-height:1.5;}
+.kbd{background:#f1f5fa;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-weight:700;font-size:12px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <div class="hdr-row">
+      <h1>那須ハイランドパークガイド<small>NASU HIGHLAND PARK GUIDE</small></h1>
+      <div class="hpill" id="hpill">👦 身長<b id="hval">115</b>cm</div>
+    </div>
+  </header>
+
+  <!-- MAP -->
+  <section class="view on" id="v-map">
+    <div class="datebar">📅 <span id="datebar-txt"></span></div>
+    <div class="prog"><span class="prog-txt">🎢 のった 0 / 0</span><span class="rst" id="rst-map">記録リセット</span></div>
+    <div class="chips" id="mapchips"></div>
+    <div id="mapwrap">
+      <div class="legend" id="legend"></div>
+      <svg id="mapsvg" viewBox="0 0 1000 1052" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="zbtns">
+        <div class="zbtn" id="zin">＋</div>
+        <div class="zbtn" id="zout">－</div>
+        <div class="zbtn" id="zreset" style="font-size:16px">⟳</div>
+      </div>
+    </div>
+    <p class="note" style="text-align:center;margin-top:10px">ピンをタップで詳細。ドラッグで移動・二本指で拡大。<br>色は身長<b id="hval2">115</b>cmで乗れるか、✓は乗った記録です。</p>
+  </section>
+
+  <!-- ATTRACTIONS -->
+  <section class="view" id="v-attr">
+    <div class="prog"><span class="prog-txt">🎢 のった 0 / 0</span><span class="rst" id="rst-attr">記録リセット</span></div>
+    <div class="chips" id="attrcat"></div>
+    <div class="chips" id="attrfilt"></div>
+    <div id="attrlist"></div>
+  </section>
+
+  <!-- RESTAURANTS -->
+  <section class="view" id="v-rest">
+    <div id="restlist"></div>
+  </section>
+
+  <!-- ROUTES -->
+  <section class="view" id="v-route">
+    <div id="routelist"></div>
+  </section>
+
+  <!-- INFO -->
+  <section class="view" id="v-info"></section>
+
+  <!-- Tabs -->
+  <nav class="tabbar">
+    <div class="tab on" data-v="map"><div class="ic">🗺️</div>マップ</div>
+    <div class="tab" data-v="attr"><div class="ic">🎢</div>のりもの</div>
+    <div class="tab" data-v="rest"><div class="ic">🍴</div>食事</div>
+    <div class="tab" data-v="route"><div class="ic">🚶</div>ルート</div>
+    <div class="tab" data-v="info"><div class="ic">ℹ️</div>情報</div>
+  </nav>
+</div>
+
+<div class="sheet-bg" id="sheetbg"></div>
+<div class="sheet" id="sheet"><div class="grab"></div><div id="sheetbody"></div></div>
+
+<script>
+/* ---------- DATA (公式サイト・身長年齢制限PDF 2026 確認) ---------- */
+var AREAS=[
+ {id:"kings",name:"キングスコート",c:"#7c53c9",x:475,y:725,w:160,h:180},
+ {id:"mori",name:"森と水の\nファンタジーランド",c:"#2fae6a",x:55,y:600,w:310,h:290},
+ {id:"carousel",name:"カルーセルパーク\n＆ヴィクトリアンガーデン",c:"#d1568f",x:235,y:470,w:320,h:210},
+ {id:"tropic",name:"トロピカーナパーク",c:"#12a3a3",x:670,y:590,w:310,h:240},
+ {id:"galaxy",name:"ギャラクシー\n＆スタープラザ",c:"#4257c9",x:625,y:300,w:350,h:270},
+ {id:"coaster",name:"コースタープラザ",c:"#ef8a2b",x:560,y:40,w:320,h:180},
+ {id:"rock",name:"ロックンロール\nプラザ",c:"#e05252",x:420,y:60,w:220,h:250},
+ {id:"town",name:"タウンセンター・入口",c:"#c79a5a",x:390,y:900,w:230,h:130},
+ {id:"forest",name:"フォレスト\nプラザ",c:"#5aa84a",x:300,y:170,w:150,h:110}
+];
+var CAT={coaster:"コースター",thrill:"絶叫マシン",kids:"キッズのりもの",family:"ファミリー",water:"水のりもの",indoor:"屋内・迷路",animal:"どうぶつ",other:"その他"};
+
+// minH:必要身長 / gUnder:この身長未満は保護者同乗が必要 / maxH:上限 / senior65:65才以上不可
+var ATTR=[
+ {n:1,name:"ダークキャッスル",area:"kings",cat:"indoor",price:700,minH:0,age:"未就学児は保護者同伴",tags:["rain"],pop:0,x:548,y:893},
+ {n:2,name:"ディノワールド",area:"kings",cat:"family",price:700,minH:0,tags:["rain","baby","preg"],pop:1,x:578,y:862},
+ {n:3,name:"ウーピーの秘密基地",area:"kings",cat:"kids",price:0,minH:0,tags:["preg"],pop:0,x:545,y:762,note:"アミューズメント＆休憩所"},
+ {n:4,name:"レーザーアトラクション恐竜研究所",area:"kings",cat:"indoor",price:800,minH:0,age:"未就学児は保護者同伴",tags:["rain"],pop:1,x:540,y:792},
+ {n:7,name:"ウーピーコースター",area:"mori",cat:"coaster",price:400,minH:0,age:"未就学児は保護者同乗",tags:["rainx"],pop:1,x:188,y:822},
+ {n:8,name:"アラビアンメリー",area:"mori",cat:"family",price:500,minH:0,tags:["baby","dog"],pop:0,x:350,y:850,note:"わんちゃん10kg未満同乗可"},
+ {n:9,name:"ウーピーのトレジャーハンティング",area:"mori",cat:"kids",price:400,minH:0,tags:["baby"],pop:0,x:238,y:742},
+ {n:10,name:"りんどう湖のどうぶつふれあいFarm",area:"mori",cat:"animal",price:0,minH:0,tags:["preg"],pop:0,x:132,y:640,note:"入場料。りんどう湖ファミリー牧場エリア"},
+ {n:11,name:"ナスレチック",area:"mori",cat:"indoor",price:1000,minH:110,age:"小学3年生までは保護者同伴",tags:["rain","new"],pop:1,x:205,y:668,note:"体重100kg以上は利用不可"},
+ {n:12,name:"フロッグホッパー",area:"carousel",cat:"kids",price:400,minH:0,age:"未就学児は保護者同乗",tags:[],pop:1,x:386,y:712},
+ {n:13,name:"ウォーターパレード",area:"carousel",cat:"water",price:400,minH:0,tags:["baby"],pop:0,x:346,y:682},
+ {n:14,name:"アドベンチャーサファリ",area:"carousel",cat:"kids",price:500,minH:0,tags:["baby","preg","rainx"],pop:0,x:364,y:646},
+ {n:15,name:"ティーカップ",area:"carousel",cat:"family",price:500,minH:0,tags:["baby","dog"],pop:0,x:413,y:585,note:"わんちゃん25kg未満同乗可",closed:"当面 運休（メンテナンスのため）"},
+ {n:16,name:"ウェーブスィンガーNEO",area:"carousel",cat:"thrill",price:600,minH:120,tags:[],pop:1,x:364,y:542,note:"3歳は保護者とペアシート利用。1人で乗るには120cm必要"},
+ {n:17,name:"カルーセル",area:"carousel",cat:"family",price:500,minH:0,tags:["rain","baby","preg"],pop:1,x:536,y:527},
+ {n:18,name:"カード迷路 ぐるり森大冒険",area:"carousel",cat:"indoor",price:500,minH:0,age:"未就学児は保護者同伴",tags:["rain","baby"],pop:1,x:268,y:652,note:"パスをお持ちの方は2回目以降100円"},
+ {n:19,name:"洞窟探検 MOGURA",area:"carousel",cat:"indoor",price:1000,minH:0,age:"未就学児は保護者同伴",tags:["rain"],pop:1,x:441,y:628,note:"利用に同意書の記入が必要（6/1〜）。MOGURA前のQRから提出"},
+ {n:20,name:"屋内型コースター SHINPI＋",area:"tropic",cat:"coaster",price:900,minH:0,age:"未就学児は保護者同乗",tags:["rain"],pop:1,x:935,y:675},
+ {n:21,name:"リバーアドベンチャー",area:"tropic",cat:"water",price:1000,minH:0,age:"未就学児は保護者同乗",tags:[],pop:1,x:830,y:765},
+ {n:22,name:"ポップンスマイル",area:"tropic",cat:"kids",price:500,minH:0,age:"原則 未就学児は保護者同乗",tags:["dog","preg"],pop:0,x:718,y:732,note:"わんちゃん10kg未満同乗可"},
+ {n:23,name:"大観覧車",area:"tropic",cat:"family",price:600,minH:0,age:"未就学児は保護者同乗",tags:["rain","dog","preg"],pop:1,x:712,y:585,note:"わんちゃん30kg未満同乗可。パーク中央のランドマーク"},
+ {n:24,name:"パラボ！",area:"tropic",cat:"thrill",price:500,minH:120,tags:["rainx"],pop:1,x:868,y:622},
+ {n:25,name:"嫌ナよ館（お化け屋敷）",area:"tropic",cat:"indoor",price:900,minH:0,age:"未就学児は保護者同伴",tags:["rain","new"],pop:1,x:949,y:505},
+ {n:26,name:"F²（エフ・ツー）",area:"tropic",cat:"coaster",price:1200,minH:130,maxH:200,senior65:true,tags:[],pop:0,x:900,y:715,note:"身長200cmまで。65才以上は利用不可"},
+ {n:27,name:"6層 立体迷路 GiGaMo Ver2.0",area:"tropic",cat:"indoor",price:800,minH:0,tags:["dog","baby"],pop:1,x:689,y:543},
+ {n:28,name:"スペースジェット",area:"galaxy",cat:"kids",price:500,minH:0,age:"未就学児は保護者同乗。運転は身長150cm以上",tags:["baby"],pop:0,x:790,y:532},
+ {n:29,name:"スーパーバイキング",area:"galaxy",cat:"thrill",price:600,minH:110,gUnder:120,tags:["rainx"],pop:1,x:795,y:500,note:"110〜119cmの方は保護者同伴（専用シート）"},
+ {n:30,name:"フライングサブマリン",area:"galaxy",cat:"thrill",price:600,minH:97,gUnder:120,tags:[],pop:0,x:778,y:445,note:"〜空飛ぶ潜水艇〜 身長97cm以上必要。120cm未満は保護者同乗"},
+ {n:31,name:"スカイバルーン",area:"galaxy",cat:"family",price:500,minH:0,age:"未就学児は保護者同乗",tags:["baby","rainx"],pop:0,x:650,y:360},
+ {n:32,name:"バットフライヤー",area:"galaxy",cat:"thrill",price:800,minH:0,gUnder:101,age:"未就学児は保護者同伴",tags:[],pop:0,x:922,y:400,note:"100cm以下の方は保護者同伴",closed:"当面 運休（メンテナンスのため）"},
+ {n:33,name:"スペースショット",area:"galaxy",cat:"thrill",price:900,minH:130,senior65:true,tags:["rainx"],pop:1,x:682,y:352,note:"65才以上は利用不可"},
+ {n:34,name:"フラッシュダンス",area:"galaxy",cat:"thrill",price:500,minH:110,age:"未就学児は保護者同乗",tags:["rain"],pop:1,x:775,y:352},
+ {n:35,name:"ウォーターコースター",area:"coaster",cat:"coaster",price:700,minH:0,age:"未就学児は保護者同乗",tags:[],pop:1,x:660,y:225},
+ {n:36,name:"キャメルコースター悟空",area:"coaster",cat:"coaster",price:900,minH:110,age:"未就学児は保護者同乗",tags:["rainx"],pop:1,x:638,y:148},
+ {n:37,name:"スピンターンコースター",area:"coaster",cat:"coaster",price:900,minH:110,gUnder:135,tags:[],pop:0,x:810,y:148,note:"135cm未満は保護者同乗"},
+ {n:38,name:"ビッグバーンコースター",area:"coaster",cat:"coaster",price:900,minH:120,senior65:true,tags:[],pop:1,x:763,y:58,note:"65才以上は利用不可。園内最大級の絶叫コースター"},
+ {n:39,name:"ジャイアントゴーカート",area:"rock",cat:"kids",price:600,minH:0,age:"3歳未満は保護者同伴。運転は身長150cm以上",tags:["baby"],pop:1,x:680,y:110},
+ {n:40,name:"XDダークライド",area:"rock",cat:"indoor",price:800,minH:100,tags:["rain"],pop:1,x:638,y:230,note:"シューティングライド"},
+ {n:41,name:"VRライドシアター",area:"rock",cat:"indoor",price:800,minH:100,tags:["rain"],pop:1,x:652,y:278,note:"7歳以上かつ身長100cm以上"},
+ {n:42,name:"フォレストプラザ",area:"forest",cat:"other",price:0,minH:0,tags:[],pop:0,x:372,y:225,note:"イベントスペース"}
+];
+
+var REST=[
+ {key:"A",name:"那須ハイダイニング",genre:"大型レストラン（麺・カレー・丼）",status:"OPEN",x:500,y:718,
+   menu:[["とんこつ醬油ラーメン",1300],["金沢カレー",1200],["牛肉うどん",1200]],desc:"パーク最大の食事処。テラス席はペット同伴OK。"},
+ {key:"C",name:"わんっだふるトロピカーナ",genre:"トロピカル料理（犬同伴）",status:"売店のみOPEN",x:940,y:760,
+   menu:[["ロコモコ丼",1200],["ハンバーグカレー",1100],["パスタ",1000]],desc:"全席わんちゃんOK。現在は売店営業。"},
+ {key:"G",name:"ギャラクシー・カフェ",genre:"カフェ・軽食",status:"OPEN",x:930,y:268,
+   menu:[["醬油ラーメン",900],["かけうどん",800],["ソフトクリーム",500]],desc:"スペースショット直下、宇宙テーマの店。"},
+ {key:"F",name:"ロックンロールダイナー ファーストフード",genre:"ファストフード",status:"OPEN",x:470,y:120,
+   menu:[["マルゲリータピザ",null],["ホットドッグ",null],["焼きそば",null]],desc:"軽くつまめる80'sアメリカンダイナー。"},
+ {key:"K",name:"渓流釣り茶屋",genre:"軽食・釣り体験",status:"OPEN（冬季クローズ）",x:620,y:880,
+   menu:[["ソース焼きそば",600],["ポテト",500],["釣り体験（1匹）",1000]],desc:"渓流でニジマス釣り。釣った魚はその場で。"},
+ {key:"B",name:"ロックンロールダイナー 本店",genre:"ハンバーガー・ホットドッグ",status:"CLOSE",x:500,y:70,
+   menu:[["ロックンロールバーガー",1500],["デミチーズバーガー",1300]],desc:"80年代アメリカンダイナー。現在クローズ。"}
+];
+
+var TICKETS={
+ rows:[
+  ["大人（中学生以上）",1600,6100,3850],
+  ["小人（3歳〜小学生）",800,4400,2600],
+  ["シニア（65歳以上）",800,4400,2600]
+ ],
+ baby:"3歳未満は無料"
+};
+
+var ROUTES=[
+ {id:"kids",title:"115cm キッズ王道コース",color:"linear-gradient(135deg,#22b06b,#0e7a4b)",
+  sub:"背が115cmのお子さんが乗れるものだけを、入口から反時計回りに最短で。",
+  steps:[
+   [23,"入ってすぐ中央の大観覧車で全体を把握。次にどこへ行くか作戦会議。"],
+   [18,"カード迷路ぐるり森大冒険。パスなら2回目100円でリピートしやすい。"],
+   [17,"カルーセル＆ティーカップでウォームアップ。妊婦さんも乗れる。"],
+   [11,"ナスレチックで体を動かす（110cm〜／115cmでOK）。"],
+   [20,"屋内コースターSHINPI＋。雨でも動く人気コースター。"],
+   [36,"キャメルコースター悟空（110cm〜）でコースターデビュー。"],
+   [21,"リバーアドベンチャーで水しぶき。暑い日はここで涼む。"],
+   [40,"XDダークライド／VRで座って休憩がてらの映像系。"]
+  ]},
+ {id:"rain",title:"雨の日 屋内コース",color:"linear-gradient(135deg,#2f6fc4,#0c4a8e)",
+  sub:"那須は山の天気。雨でも動く屋内・雨天OKだけを繋ぐ保険ルート。",
+  steps:[
+   [2,"ディノワールドで恐竜の世界へ（屋内）。"],
+   [4,"レーザーアトラクション恐竜研究所でシューティング。"],
+   [19,"洞窟探検MOGURAで迷路探検。"],
+   [18,"カード迷路ぐるり森大冒険。"],
+   [25,"嫌ナよ館のお化け屋敷でひんやり。"],
+   [20,"屋内コースターSHINPI＋。"],
+   [23,"大観覧車で雨の那須高原を眺める。"],
+   [40,"XDダークライド／VRライドシアターで締め。"]
+  ]},
+ {id:"thrill",title:"絶叫 満喫コース（身長130cm〜）",color:"linear-gradient(135deg,#ff6a3d,#c9341f)",
+  sub:"背の高い人・大人向け。園内の大型コースターと絶叫マシンを一気に。",
+  steps:[
+   [38,"ビッグバーンコースター（120cm〜）。園内最大級。"],
+   [37,"スピンターンコースター。"],
+   [26,"F²（エフ・ツー）（130cm〜）。"],
+   [33,"スペースショット（130cm〜）で急上昇急降下。"],
+   [29,"スーパーバイキングで大きく揺れる。"],
+   [24,"パラボ！（120cm〜）。"],
+   [35,"ウォーターコースターでクールダウン。"]
+  ]}
+];
+
+/* ---------- height judgment ---------- */
+var H=115;
+function judge(a){
+  if(a.price===0 && a.cat==="other") return {t:"info",label:"イベント"};
+  if(a.minH && H < a.minH) return {t:"no",label:"のれない",why:"身長"+a.minH+"cm〜"};
+  if(a.maxH && H > a.maxH) return {t:"no",label:"のれない",why:"身長"+a.maxH+"cmまで"};
+  if(a.gUnder && H < a.gUnder) return {t:"warn",label:"付き添いで",why:"保護者同乗"};
+  if((a.minH && H>=a.minH)) return {t:"go",label:"のれる",why:"身長"+a.minH+"cm〜クリア"};
+  return {t:"go",label:"のれる",why:""};
+}
+function recommendStars(a){
+  var s=1.5;
+  if(a.pop) s+=1.6;
+  if(a.tags.indexOf("new")>=0) s+=0.6;
+  if(a.cat==="coaster"||a.cat==="thrill") s+=0.9;
+  var j=judge(a);
+  if(j.t==="go") s+=1.0; else if(j.t==="warn") s+=0.4;
+  if(a.tags.indexOf("rain")>=0) s+=0.3;
+  if(a.cat==="other") s=0;
+  return Math.max(0,Math.min(5,Math.round(s)));
+}
+function areaName(id){for(var i=0;i<AREAS.length;i++)if(AREAS[i].id===id)return AREAS[i].name.replace(/\n/g,"");return"";}
+function priceTxt(p){return p===0?"入場料 / 無料":"￥"+p.toLocaleString();}
+
+/* ---------- 訪問日（7/4 土）専用 ---------- */
+var VISIT={date:"2026/7/4（土）",open:"9:30",close:"16:30",
+  note:"7/18以降の土日は17:30まで延長営業。この日は16:30閉園なので逆算して回ると安心。",
+  events:"この日の特別イベントは公式に告知なし（スカイランタンフェスは7/18〜19）。",
+  closed:[/* 当日クローズ施設のマップ番号やレストランkey */"B"],
+  water:"夏の水系のりもの（リバーアドベンチャー等）は通常営業。専用プールの営業は公式カレンダーに記載を確認できませんでした。"
+};
+
+/* ---------- 乗った記録（localStorage） ---------- */
+var RIDDEN=new Set();
+try{RIDDEN=new Set(JSON.parse(localStorage.getItem("nasu_ridden")||"[]"));}catch(e){}
+function saveRidden(){try{localStorage.setItem("nasu_ridden",JSON.stringify(Array.from(RIDDEN)));}catch(e){}}
+function riddenCount(){var c=0;ATTR.forEach(function(a){if(a.cat!=="other"&&RIDDEN.has(a.n))c++;});return c;}
+function totalRideable(){var c=0;ATTR.forEach(function(a){if(a.cat!=="other")c++;});return c;}
+function toggleRidden(n){
+  if(RIDDEN.has(n))RIDDEN.delete(n);else RIDDEN.add(n);
+  saveRidden();repaintPins();renderAttr();updateProgress();
+  var sb=document.getElementById("sheetbody");
+  if(sheet.classList.contains("on")&&sb.getAttribute("data-n")===String(n))openAttr(n);
+}
+function updateProgress(){
+  var t="🎢 のった "+riddenCount()+" / "+totalRideable();
+  document.querySelectorAll(".prog-txt").forEach(function(e){e.textContent=t;});
+}
+function resetRidden(){RIDDEN=new Set();saveRidden();repaintPins();renderAttr();updateProgress();}
+
+/* ---------- MAP ---------- */
+var svg=document.getElementById("mapsvg");
+var SVGNS="http://www.w3.org/2000/svg";
+var mapFilter="height"; // height | coaster | kids | rain | all
+function el(t,at){var e=document.createElementNS(SVGNS,t);for(var k in at)e.setAttribute(k,at[k]);return e;}
+
+function pinColor(a){if(a.closed)return"#6b7684";var j=judge(a);return j.t==="go"?"#22b06b":j.t==="warn"?"#f5a623":j.t==="no"?"#e8503a":"#8aa0b8";}
+function buildMap(){
+  svg.innerHTML="";
+  svg.appendChild(el("rect",{x:0,y:0,width:1000,height:1052,fill:"#cfe8c0"}));
+  var g=el("g",{id:"mapg"});svg.appendChild(g);
+  var fb=el("g",{id:"fb"});g.appendChild(fb);
+  // real park map background (falls back to schematic zones if image is missing)
+  var img=el("image",{x:0,y:0,width:1000,height:1052,preserveAspectRatio:"xMidYMid meet"});
+  img.setAttributeNS("http://www.w3.org/1999/xlink","href","map.jpg");
+  img.setAttribute("href","map.jpg");
+  img.addEventListener("error",function(){drawFallback(fb);});
+  g.appendChild(img);
+  g.appendChild(el("g",{id:"trail"})); // 足あと線（乗った順の動線・ピンの下に描画）
+  // restaurants (fork markers)
+  REST.forEach(function(r){
+    var rg=el("g",{class:"pin",'data-rest':r.key});
+    rg.appendChild(el("rect",{x:r.x-11,y:r.y-11,width:22,height:22,rx:7,fill:"#fff",stroke:"#ff6a3d",'stroke-width':2.5}));
+    var rt=el("text",{x:r.x,y:r.y+5,'text-anchor':"middle",'font-size':"13"});rt.textContent="🍴";rg.appendChild(rt);
+    g.appendChild(rg);
+  });
+  // attraction pins
+  ATTR.forEach(function(a){
+    if(a.cat==="other")return;
+    var pg=el("g",{class:"pin",'data-n':a.n,transform:"translate("+a.x+","+a.y+")"});
+    pg.appendChild(el("circle",{class:"pring",cx:0,cy:0,r:19,fill:"none",stroke:"#0c4a8e",'stroke-width':3,opacity:0}));
+    pg.appendChild(el("circle",{class:"pdot",cx:0,cy:0,r:12,fill:pinColor(a),stroke:"#fff",'stroke-width':2.5}));
+    var tx=el("text",{x:0,y:4,'text-anchor':"middle",'font-size':"11.5",'font-weight':"800",fill:"#fff"});
+    tx.textContent=a.n;pg.appendChild(tx);
+    var chk=el("g",{class:"chk",opacity:RIDDEN.has(a.n)?1:0});
+    chk.appendChild(el("circle",{cx:10,cy:-11,r:7,fill:"#1f9d57",stroke:"#fff",'stroke-width':1.5}));
+    var ct=el("text",{x:10,y:-7.5,'text-anchor':"middle",'font-size':"9",'font-weight':"800",fill:"#fff"});ct.textContent="✓";chk.appendChild(ct);
+    pg.appendChild(chk);
+    if(a.closed){
+      var cb=el("g",{});
+      cb.appendChild(el("rect",{x:-27,y:5,width:30,height:14,rx:6,fill:"#c9341f",stroke:"#fff",'stroke-width':1.2}));
+      var cbt=el("text",{x:-12,y:15,'text-anchor':"middle",'font-size':"9",'font-weight':"800",fill:"#fff"});cbt.textContent="運休";cb.appendChild(cbt);
+      pg.appendChild(cb);
+    }
+    g.appendChild(pg);
+  });
+  drawTrail();applyMapFilter();
+  mapG=g;resetView();
+}
+function drawTrail(){
+  var t=document.getElementById("trail");if(!t)return;t.innerHTML="";
+  var seq=Array.from(RIDDEN).map(byN).filter(function(a){return a&&a.cat!=="other";});
+  if(seq.length<2)return;
+  var d="M "+seq.map(function(a){return a.x+" "+a.y;}).join(" L ");
+  t.appendChild(el("path",{d:d,fill:"none",stroke:"#fff",'stroke-width':6,'stroke-linejoin':"round",'stroke-linecap':"round",opacity:.65}));
+  t.appendChild(el("path",{d:d,fill:"none",stroke:"#ff5a1f",'stroke-width':3.2,'stroke-linejoin':"round",'stroke-linecap':"round",opacity:.95}));
+  seq.forEach(function(a,i){
+    var b=el("g",{});
+    b.appendChild(el("circle",{cx:a.x-11,cy:a.y+11,r:6.5,fill:"#ff5a1f",stroke:"#fff",'stroke-width':1.3}));
+    var tx=el("text",{x:a.x-11,y:a.y+14.3,'text-anchor':"middle",'font-size':"8.5",'font-weight':"800",fill:"#fff"});tx.textContent=(i+1);b.appendChild(tx);
+    t.appendChild(b);
+  });
+}
+function drawFallback(fb){
+  fb.appendChild(el("rect",{x:0,y:0,width:1000,height:1052,fill:"#cfe8c0"}));
+  AREAS.forEach(function(z){
+    fb.appendChild(el("rect",{x:z.x,y:z.y,width:z.w,height:z.h,rx:18,fill:z.c,opacity:".16",stroke:z.c,'stroke-width':1.5,'stroke-opacity':.4}));
+    z.name.split("\n").forEach(function(ln,i){
+      var t=el("text",{x:z.x+z.w/2,y:z.y+18+i*14,'text-anchor':"middle",'font-size':"12",'font-weight':"800",fill:z.c});t.textContent=ln;fb.appendChild(t);
+    });
+  });
+}
+function applyMapFilter(){
+  var pins=svg.querySelectorAll('.pin[data-n]');
+  pins.forEach(function(p){
+    var a=byN(+p.getAttribute("data-n"));var show=true;
+    if(mapFilter==="height") show=(judge(a).t!=="no");
+    else if(mapFilter==="coaster") show=(a.cat==="coaster"||a.cat==="thrill");
+    else if(mapFilter==="kids") show=(a.tags.indexOf("baby")>=0||a.cat==="kids"||a.cat==="family");
+    else if(mapFilter==="rain") show=(a.tags.indexOf("rain")>=0);
+    else if(mapFilter==="notridden") show=!RIDDEN.has(a.n);
+    else show=true;
+    p.classList.toggle("dim",!show);
+  });
+}
+function repaintPins(){
+  ATTR.forEach(function(a){
+    if(a.cat==="other")return;
+    var pin=svg.querySelector('.pin[data-n="'+a.n+'"]');if(!pin)return;
+    var p=pin.querySelector('.pdot');if(p)p.setAttribute("fill",pinColor(a));
+    var chk=pin.querySelector('.chk');if(chk)chk.setAttribute("opacity",RIDDEN.has(a.n)?1:0);
+  });
+  drawTrail();applyMapFilter();
+}
+
+/* pan/zoom */
+var mapG=null,scale=1,tx=0,ty=0,VBW=1000,VBH=1052;
+function apply(){if(mapG)mapG.setAttribute("transform","translate("+tx+","+ty+") scale("+scale+")");}
+function resetView(){scale=1;tx=0;ty=0;apply();}
+function clampScale(s){return Math.max(0.7,Math.min(4,s));}
+function zoomAt(cx,cy,ns){ns=clampScale(ns);var wx=(cx-tx)/scale,wy=(cy-ty)/scale;scale=ns;tx=cx-wx*scale;ty=cy-wy*scale;apply();}
+function svgPt(clientX,clientY){var r=svg.getBoundingClientRect();return{x:(clientX-r.left)/r.width*VBW,y:(clientY-r.top)/r.height*VBH};}
+document.getElementById("zin").onclick=function(){zoomAt(500,526,scale*1.35);};
+document.getElementById("zout").onclick=function(){zoomAt(500,526,scale/1.35);};
+document.getElementById("zreset").onclick=resetView;
+(function(){
+  var lx=0,ly=0,pts={},pd=0;
+  function nkeys(){return Object.keys(pts).length;}
+  function purge(now){for(var id in pts){if(now-pts[id].t>3000)delete pts[id];}}
+  svg.addEventListener("pointerdown",function(e){
+    var now=Date.now();purge(now);
+    try{svg.setPointerCapture(e.pointerId);}catch(_){}
+    pts[e.pointerId]={sx:e.clientX,sy:e.clientY,x:e.clientX,y:e.clientY,moved:false,pinch:false,t:now};
+    lx=e.clientX;ly=e.clientY;
+    if(nkeys()>=2){for(var k in pts)pts[k].pinch=true;}
+  });
+  svg.addEventListener("pointermove",function(e){
+    var rec=pts[e.pointerId];if(!rec)return;rec.x=e.clientX;rec.y=e.clientY;rec.t=Date.now();
+    var ids=Object.keys(pts);
+    if(ids.length>=2){
+      for(var k in pts)pts[k].pinch=true;
+      var a=pts[ids[0]],b=pts[ids[1]];var d=Math.hypot(a.x-b.x,a.y-b.y);
+      var mid=svgPt((a.x+b.x)/2,(a.y+b.y)/2);
+      if(pd)zoomAt(mid.x,mid.y,scale*(d/pd));pd=d;
+    }else{
+      if(Math.abs(e.clientX-rec.sx)+Math.abs(e.clientY-rec.sy)>7)rec.moved=true;
+      var r=svg.getBoundingClientRect();
+      tx+=(e.clientX-lx)/r.width*VBW;ty+=(e.clientY-ly)/r.height*VBH;lx=e.clientX;ly=e.clientY;apply();
+    }
+  });
+  function up(e){
+    var rec=pts[e.pointerId];var cx=e.clientX,cy=e.clientY;
+    try{svg.releasePointerCapture(e.pointerId);}catch(_){}
+    delete pts[e.pointerId];
+    if(nkeys()<2)pd=0;
+    if(rec&&!rec.moved&&!rec.pinch){
+      var t=document.elementFromPoint(cx,cy);
+      var pin=t&&t.closest?t.closest(".pin"):null;
+      if(pin){
+        if(pin.hasAttribute("data-n"))openAttr(+pin.getAttribute("data-n"));
+        else if(pin.hasAttribute("data-rest")){var k=pin.getAttribute("data-rest");for(var i=0;i<REST.length;i++)if(REST[i].key===k){openRest(REST[i]);break;}}
+      }
+    }
+  }
+  svg.addEventListener("pointerup",up);svg.addEventListener("pointercancel",up);
+  svg.addEventListener("wheel",function(e){e.preventDefault();var p=svgPt(e.clientX,e.clientY);zoomAt(p.x,p.y,scale*(e.deltaY<0?1.12:0.9));},{passive:false});
+})();
+function focusPin(n){
+  var a=byN(n);if(!a)return;
+  scale=2.4;tx=500-a.x*scale;ty=526-a.y*scale;apply();
+  var pin=svg.querySelector('.pin[data-n="'+n+'"]');
+  if(pin){pin.classList.add("hl");pin.classList.remove("dim");
+    var ring=pin.querySelector(".pring");if(ring){ring.setAttribute("opacity","1");
+      setTimeout(function(){ring.setAttribute("opacity","0");pin.classList.remove("hl");},2200);}}
+}
+
+/* ---------- helpers ---------- */
+function imgFail(el){el.style.display="none";}
+function byN(n){for(var i=0;i<ATTR.length;i++)if(ATTR[i].n===n)return ATTR[i];return null;}
+function tagChips(a){
+  var m={rain:["☔ 雨でもOK","rain"],rainx:["☂ 雨天運休","rain"],baby:["👶 0〜2歳OK","baby"],
+    preg:["🤰 妊婦さんOK","baby"],dog:["🐶 わんちゃんOK","dog"],new:["✨ NEW",""]};
+  var h="";a.tags.forEach(function(t){if(m[t])h+='<span class="tag '+m[t][1]+'">'+m[t][0]+'</span>';});
+  return h;
+}
+function badgeHtml(a){
+  var j=judge(a);if(j.t==="info")return"";
+  var cls=j.t==="go"?"b-go":j.t==="warn"?"b-warn":"b-no";
+  var ic=j.t==="go"?"🟢":j.t==="warn"?"🟡":"🔴";
+  return '<span class="badge '+cls+'">'+ic+' '+H+'cmで'+j.label+(j.why?'（'+j.why+'）':'')+'</span>';
+}
+
+/* ---------- ATTRACTION LIST ---------- */
+var catFilter="all",onlyRideable=false,onlyNotRidden=false;
+function renderAttr(){
+  var wrap=document.getElementById("attrlist");wrap.innerHTML="";
+  var list=ATTR.filter(function(a){return a.cat!=="other";});
+  list=list.filter(function(a){
+    if(catFilter!=="all"&&a.cat!==catFilter)return false;
+    if(onlyRideable&&judge(a).t==="no")return false;
+    if(onlyNotRidden&&RIDDEN.has(a.n))return false;
+    return true;
+  });
+  list.sort(function(a,b){return (a.closed?1:0)-(b.closed?1:0)||recommendStars(b)-recommendStars(a)||a.n-b.n;});
+  if(!list.length){wrap.innerHTML='<p class="note" style="text-align:center;padding:30px">条件に合うのりものがありません。</p>';return;}
+  list.forEach(function(a){
+    var st=recommendStars(a);var stars=st>0?'<span class="stars">'+"★".repeat(st)+"☆".repeat(5-st)+'</span>':"";
+    var rid=RIDDEN.has(a.n);
+    var j=judge(a);
+    var sd=a.closed?'<span class="statusdot sd-closed"><i></i>運休</span>'
+      :(j.t==="info"?"":'<span class="statusdot sd-'+j.t+'"><i></i>'+(j.t==="go"?"のれる":j.t==="warn"?"付き添い":"のれない")+'</span>');
+    var ribbon=a.closed?'<span class="closeribbon">🚧 運休中</span>':"";
+    var d=document.createElement("div");d.className="card"+(rid?" ridden":"")+(a.closed?" closed":"");
+    d.innerHTML=
+     '<div class="imgwrap"><img class="cardimg" src="img/a'+a.n+'.jpg" loading="lazy" alt="" onerror="imgFail(this)">'+ribbon+sd+'</div>'+
+     '<div class="arow"><div class="anum">'+a.n+'</div>'+
+     '<div style="flex:1"><div class="aname">'+a.name+(rid?' <span class="ridtag">✓のった</span>':'')+'</div>'+
+     '<div class="aarea">'+areaName(a.area)+' ・ '+CAT[a.cat]+'</div></div>'+
+     '<div style="text-align:right"><div class="aprice">'+priceTxt(a.price)+'</div>'+stars+'</div></div>'+
+     (a.closed?'<span class="badge b-closed">🚧 '+a.closed+'</span>':'')+
+     badgeHtml(a)+
+     (a.note?'<div class="note">'+a.note+'</div>':'')+
+     (a.age?'<div class="note">👪 '+a.age+'</div>':'')+
+     '<div class="tags">'+tagChips(a)+'</div>'+
+     '<div class="btnrow"><button class="mapbtn" data-map="'+a.n+'">📍 地図で見る</button>'+
+     '<button class="ridebtn'+(rid?" on":"")+'" data-ride="'+a.n+'">'+(rid?"✓ のった":"のったにする")+'</button></div>';
+    wrap.appendChild(d);
+  });
+  wrap.querySelectorAll("[data-map]").forEach(function(b){
+    b.onclick=function(){go("map");setTimeout(function(){focusPin(+b.getAttribute("data-map"));},60);};
+  });
+  wrap.querySelectorAll("[data-ride]").forEach(function(b){
+    b.onclick=function(){toggleRidden(+b.getAttribute("data-ride"));};
+  });
+}
+
+/* ---------- RESTAURANTS ---------- */
+function renderRest(){
+  var w=document.getElementById("restlist");w.innerHTML="";
+  var stColor={ "OPEN":"#22b06b","CLOSE":"#e8503a" };
+  REST.forEach(function(r){
+    var sc=r.status.indexOf("CLOSE")>=0?"#e8503a":r.status.indexOf("売店")>=0?"#f5a623":"#22b06b";
+    var menu=r.menu.map(function(m){return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--line);font-size:13.5px"><span>'+m[0]+'</span><b style="color:var(--accent)">'+(m[1]?("￥"+m[1].toLocaleString()):"時価")+'</b></div>';}).join("");
+    var dishes='<div class="dishcap">🍽 こんな料理</div><div class="dishrow">'+
+      [1,2,3].map(function(i){return '<img src="img/d'+r.key+i+'.jpg" loading="lazy" alt="" onerror="imgFail(this)">';}).join("")+'</div>';
+    var d=document.createElement("div");d.className="card";
+    d.innerHTML=
+     '<img class="cardimg" src="img/r'+r.key+'.jpg" loading="lazy" alt="" onerror="imgFail(this)">'+
+     '<div style="display:flex;align-items:center;gap:8px"><div class="aname" style="flex:1">'+r.name+'</div>'+
+     '<span style="font-size:11.5px;font-weight:800;color:#fff;background:'+sc+';border-radius:6px;padding:3px 8px">'+r.status+'</span></div>'+
+     '<div class="aarea">🍴 '+r.genre+'</div>'+
+     '<div class="note">'+r.desc+'</div>'+
+     dishes+
+     '<div style="margin-top:2px">'+menu+'</div>'+
+     '<button class="mapbtn" data-restmap="'+r.key+'">📍 地図で見る</button>';
+    w.appendChild(d);
+  });
+  w.querySelectorAll("[data-restmap]").forEach(function(b){
+    b.onclick=function(){go("map");setTimeout(function(){var r=REST.filter(function(x){return x.key===b.getAttribute("data-restmap");})[0];scale=2.4;tx=500-r.x*scale;ty=526-r.y*scale;apply();openRest(r);},60);};
+  });
+}
+
+/* ---------- ROUTES ---------- */
+function renderRoute(){
+  var w=document.getElementById("routelist");w.innerHTML="";
+  ROUTES.forEach(function(rt){
+    var h=document.createElement("div");h.className="hero";h.style.background=rt.color;
+    h.innerHTML='<h3>'+rt.title+'</h3><p>'+rt.sub+'</p>';
+    w.appendChild(h);
+    var box=document.createElement("div");box.className="card";
+    var html="";
+    rt.steps.forEach(function(s,i){
+      var a=byN(s[0]);var last=i===rt.steps.length-1;
+      var j=a?judge(a):null;var ic=j?(j.t==="go"?"🟢":j.t==="warn"?"🟡":"🔴"):"";
+      html+='<div class="step"><div class="step-n"><div class="step-dot">'+(i+1)+'</div>'+(last?'':'<div class="step-line"></div>')+'</div>'+
+        '<div class="step-b"><div class="t">'+(a?a.name:"")+' <span style="font-size:12px">'+ic+'</span></div>'+
+        '<div class="d">'+s[1]+'</div>'+
+        '<button class="mapbtn" style="padding:6px 11px;font-size:12px;margin-top:6px" data-map="'+s[0]+'">📍 地図で見る</button></div></div>';
+    });
+    box.innerHTML=html;w.appendChild(box);
+    box.querySelectorAll("[data-map]").forEach(function(b){
+      b.onclick=function(){go("map");setTimeout(function(){focusPin(+b.getAttribute("data-map"));},60);};
+    });
+  });
+}
+
+/* ---------- INFO ---------- */
+function renderInfo(){
+  var v=document.getElementById("v-info");
+  var trows=TICKETS.rows.map(function(r){return '<tr><td>'+r[0]+'</td><td class="p">￥'+r[1].toLocaleString()+'</td><td class="p">￥'+r[2].toLocaleString()+'</td><td>￥'+r[3].toLocaleString()+'</td></tr>';}).join("");
+  v.innerHTML=
+   '<div class="sec-t" style="margin-top:4px">📅 '+VISIT.date+' の予定</div>'+
+   '<div class="card"><div class="info-p"><b>営業</b> '+VISIT.open+' 〜 '+VISIT.close+'<br>'+
+   VISIT.note+'<br>'+VISIT.events+'<br>'+VISIT.water+'<br>'+
+   '当日クローズ：<b>ロックンロールダイナー本店</b>（ファストフード店は営業）。渓流釣り茶屋は夏は営業。</div></div>'+
+
+   '<div class="sec-t">🚧 運休アトラクション</div>'+
+   '<div class="card"><div class="info-p">'+
+   '公式発表（2026/6/23 更新）で当面 運休が決まっているもの：<br>'+
+   '・<b>ティーカップ</b>（メンテナンス）<br>'+
+   '・<b>バットフライヤー</b>（メンテナンス）<br>'+
+   'のりもの一覧・地図では <b style="color:#c9341f">🚧 運休中</b> のグレー表示にしています。<br>'+
+   '<b>フォレストプラザドッグラン</b>は6/29〜9月下旬 利用不可（夏季アトラクション設置）。<br>'+
+   '<b>洞窟探検MOGURA</b>は6/1から利用に <b>同意書</b> の記入が必要（現地QRから提出）。<br>'+
+   '<span style="color:var(--sub)">天候・点検で当日さらに増えることあり。開園日の最新は公式「運行状況」（nasuhai.co.jp/attraction/daily.php）で確認を。</span>'+
+   '</div></div>'+
+
+   '<div class="sec-t">🎫 料金</div>'+
+   '<div class="card"><table class="tbl"><tr><th>区分</th><th>入園のみ</th><th>ファンタジーパス</th><th>トワイライト</th></tr>'+trows+'</table>'+
+   '<div class="note">ファンタジーパス＝入園＋乗り放題。トワイライトは14時以降のパス料金。'+TICKETS.baby+'。WEB前売り券は当日より割引あり。</div></div>'+
+
+   '<div class="sec-t">🅿️ 駐車場</div>'+
+   '<div class="card"><div class="info-p">乗用車・バス <b>一律1,000円</b>（GW・お盆など特定日は1,500円）。二輪車 無料。30分以内の退場は無料。</div></div>'+
+
+   '<div class="sec-t">🕒 営業・持ち物</div>'+
+   '<div class="card"><div class="info-p">営業時間は季節・曜日で変動。行く日の時間は公式「本日の営業時間」で要確認。<br>那須高原は標高が高く<b>朝晩は肌寒い</b>。羽織り物・タオル・水鉄砲系の着替えがあると安心。水のりもの（リバーアドベンチャー等）で濡れます。</div></div>'+
+
+   '<div class="sec-t">📱 iPhoneのホーム画面に入れる</div>'+
+   '<div class="card"><div class="info-p">'+
+   '① Safariでこのページを開く<br>'+
+   '② 下の<span class="kbd">共有</span>ボタン（□に↑）をタップ<br>'+
+   '③ <span class="kbd">ホーム画面に追加</span>を選ぶ<br>'+
+   '④ 右上の<span class="kbd">追加</span>をタップ<br>'+
+   'これで観覧車アイコンのアプリになり、電波が弱い園内でも起動します。</div></div>'+
+
+   '<div class="sec-t">🔎 凡例</div>'+
+   '<div class="card"><div class="info-p">'+
+   '🟢 のれる ／ 🟡 付き添いで のれる ／ 🔴 のれない<br>'+
+   'のりもの一覧は上の身長を変えると全部の判定が切り替わります（初期値115cm）。'+
+   '</div>'+
+   '<div class="note" style="margin-top:10px">データは那須ハイランドパーク公式サイト・身長年齢制限表（2026年時点）を基に作成。実際の運休・条件は当日の公式案内を優先してください。</div></div>';
+}
+
+/* ---------- SHEET ---------- */
+var sheet=document.getElementById("sheet"),sheetbg=document.getElementById("sheetbg");
+function showSheet(html,dataN){var sb=document.getElementById("sheetbody");sb.innerHTML=html;sb.setAttribute("data-n",dataN==null?"":String(dataN));sheet.classList.add("on");sheetbg.classList.add("on");}
+function closeSheet(){sheet.classList.remove("on");sheetbg.classList.remove("on");}
+sheetbg.onclick=closeSheet;
+function openAttr(n){
+  var a=byN(n);if(!a)return;var st=recommendStars(a);var rid=RIDDEN.has(n);
+  var stars=st>0?'<div class="stars" style="font-size:15px;margin-top:2px">'+"★".repeat(st)+"☆".repeat(5-st)+' <span style="color:var(--sub);font-size:12px;font-weight:700">おすすめ度</span></div>':"";
+  showSheet(
+   '<img class="sheetimg" src="img/a'+a.n+'.jpg" alt="" onerror="imgFail(this)">'+
+   '<h2>'+a.name+(rid?' <span class="ridtag">✓のった</span>':'')+'</h2>'+
+   '<div class="aarea" style="font-size:13px">No.'+a.n+' ・ '+areaName(a.area)+' ・ '+CAT[a.cat]+'</div>'+
+   stars+
+   (a.closed?'<div class="badge b-closed" style="font-size:14px;padding:7px 13px;margin-top:10px">🚧 現在 '+a.closed+'</div>':'')+
+   '<div style="margin:10px 0"><span class="aprice" style="font-size:20px">'+priceTxt(a.price)+'</span></div>'+
+   badgeHtml(a)+
+   (a.note?'<div class="note">'+a.note+'</div>':'')+
+   (a.age?'<div class="note">👪 '+a.age+'</div>':'')+
+   '<div class="tags">'+tagChips(a)+'</div>'+
+   '<div class="btnrow" style="margin-top:14px">'+
+   '<button class="mapbtn" style="flex:1;justify-content:center" onclick="closeSheet();focusPin('+a.n+')">📍 地図で光らせる</button>'+
+   '<button class="ridebtn'+(rid?" on":"")+'" onclick="toggleRidden('+a.n+')">'+(rid?"✓ のった":"のったにする")+'</button></div>',
+   n
+  );
+}
+function openRest(r){
+  var menu=r.menu.map(function(m){return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)"><span>'+m[0]+'</span><b style="color:var(--accent)">'+(m[1]?("￥"+m[1].toLocaleString()):"時価")+'</b></div>';}).join("");
+  var dishes='<div class="dishcap" style="margin-top:12px">🍽 こんな料理</div><div class="dishrow">'+
+    [1,2,3].map(function(i){return '<img src="img/d'+r.key+i+'.jpg" alt="" onerror="imgFail(this)">';}).join("")+'</div>';
+  showSheet('<img class="sheetimg" src="img/r'+r.key+'.jpg" alt="" onerror="imgFail(this)"><h2>'+r.name+'</h2><div class="aarea" style="font-size:13px">🍴 '+r.genre+' ・ '+r.status+'</div><div class="note">'+r.desc+'</div>'+dishes+'<div class="dishcap">📋 メニュー</div><div>'+menu+'</div>');
+}
+
+/* ---------- height control ---------- */
+document.getElementById("hpill").onclick=function(){
+  showSheet(
+   '<h2>お子さんの身長</h2><div class="note">身長を変えると、全部ののりもの判定が切り替わります。</div>'+
+   '<div style="display:flex;align-items:center;justify-content:center;gap:18px;margin:22px 0">'+
+   '<div class="zbtn" style="width:52px;height:52px;font-size:28px" onclick="setH(H-1)">－</div>'+
+   '<div style="font-size:40px;font-weight:800">'+H+'<span style="font-size:18px">cm</span></div>'+
+   '<div class="zbtn" style="width:52px;height:52px;font-size:28px" onclick="setH(H+1)">＋</div></div>'+
+   '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'+
+   [100,110,115,120,130,140].map(function(v){return '<div class="chip '+(v===H?"on":"")+'" onclick="setH('+v+')">'+v+'cm</div>';}).join("")+'</div>'
+  );
+};
+function setH(v){H=Math.max(80,Math.min(150,v));
+  document.getElementById("hval").textContent=H;
+  document.getElementById("hval2").textContent=H;
+  repaintPins();renderAttr();
+  if(sheet.classList.contains("on")&&document.getElementById("sheetbody").querySelector("h2").textContent==="お子さんの身長")document.getElementById("hpill").onclick();
+}
+
+/* ---------- nav ---------- */
+function go(v){
+  document.querySelectorAll(".view").forEach(function(x){x.classList.remove("on");});
+  document.getElementById("v-"+v).classList.add("on");
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.getAttribute("data-v")===v);});
+  window.scrollTo(0,0);
+}
+document.querySelectorAll(".tab").forEach(function(t){t.onclick=function(){go(t.getAttribute("data-v"));};});
+
+/* ---------- map chips ---------- */
+function buildMapChips(){
+  var defs=[["height","🟢 身長で乗れる"],["all","すべて"],["notridden","⬜ まだ乗ってない"],["coaster","🎢 コースター・絶叫"],["kids","👶 小さい子OK"],["rain","☔ 雨でもOK"]];
+  var w=document.getElementById("mapchips");w.innerHTML="";
+  defs.forEach(function(d){
+    var c=document.createElement("div");c.className="chip"+(d[0]===mapFilter?" on":"");c.textContent=d[1];
+    c.onclick=function(){mapFilter=d[0];buildMapChips();applyMapFilter();updateLegend();};
+    w.appendChild(c);
+  });
+}
+function updateLegend(){
+  var l=document.getElementById("legend");
+  if(mapFilter==="height"||mapFilter==="all"){
+    l.innerHTML='<div><i style="background:#22b06b"></i>のれる</div><div><i style="background:#f5a623"></i>付き添いで</div><div><i style="background:#e8503a"></i>のれない</div><div><i style="background:#6b7684"></i>運休中</div>';
+    l.style.display="block";
+  }else{l.style.display="none";}
+}
+
+/* ---------- attr chips ---------- */
+function buildAttrChips(){
+  var cw=document.getElementById("attrcat");cw.innerHTML="";
+  var cats=[["all","すべて"]].concat(Object.keys(CAT).filter(function(k){return k!=="other";}).map(function(k){return [k,CAT[k]];}));
+  cats.forEach(function(d){
+    var c=document.createElement("div");c.className="chip"+(d[0]===catFilter?" on":"");c.textContent=d[1];
+    c.onclick=function(){catFilter=d[0];buildAttrChips();renderAttr();};cw.appendChild(c);
+  });
+  var fw=document.getElementById("attrfilt");fw.innerHTML="";
+  var t=document.createElement("div");t.className="chip"+(onlyRideable?" on":"");t.textContent=(onlyRideable?"✓ ":"")+"👦 "+H+"cmで乗れるものだけ";
+  t.onclick=function(){onlyRideable=!onlyRideable;buildAttrChips();renderAttr();};fw.appendChild(t);
+  var t2=document.createElement("div");t2.className="chip"+(onlyNotRidden?" on":"");t2.textContent=(onlyNotRidden?"✓ ":"")+"⬜ まだ乗ってない";
+  t2.onclick=function(){onlyNotRidden=!onlyNotRidden;buildAttrChips();renderAttr();};fw.appendChild(t2);
+}
+
+/* ---------- init ---------- */
+document.getElementById("datebar-txt").innerHTML="<b>"+VISIT.date+"</b> "+VISIT.open+"〜"+VISIT.close+" 営業";
+function wireReset(id){var b=document.getElementById(id);if(b)b.onclick=function(){if(confirm("乗った記録をすべて消しますか？"))resetRidden();};}
+wireReset("rst-map");wireReset("rst-attr");
+buildMap();buildMapChips();updateLegend();buildAttrChips();renderAttr();renderRest();renderRoute();renderInfo();updateProgress();
+
+/* service worker */
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}
+</script>
+</body>
+</html>
